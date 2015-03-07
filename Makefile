@@ -9,7 +9,7 @@ VIRTUALENV_NAME ?= default_app
 config:
 
 install: virtualenv
-	. ./bin/activate && sudo apt-get install couchdb
+	. ./bin/activate
 
 test:
 	. ./bin/activate && nosetests  -sv ./app/test/
