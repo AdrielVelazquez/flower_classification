@@ -28,12 +28,39 @@
             </div>
           </form>
         </div>
+      </div>
+  {% elif process == "primary" %}
+      <p>Primary Petal Color</p>
+      <canvas id="chosen_color" width="200" height="60"></canvas>
+      <img src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" id="flower" style="width:304px;height:228px">
+      <button class="btn btn-sm btn-primary">Next</button>
   {% endif %}
 </div>
 {% endblock %}
 
 {% block script %}
-    $( "#upload_flower" ).click(function() {
-      alert( "Handler for .click() called." );
+    $( "#flower" ).click(function(e) {
+        var offset = $(this).offset();
+        var filename = $(this).attr("src");
+        var x = e.clientX - offset.left;
+        var y = e.clientY - offset.top;
+        $.ajax({
+                url: "{{ url_for('classification.get_image') }}",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    x: x,
+                    y: y,
+                    filename: filename,
+                }, success:function(data) {
+                var example = document.getElementById('chosen_color');
+                var context = example.getContext('2d');
+                var r = data['RGB'][0].toString()
+                var g = data['RGB'][1].toString()
+                var b = data['RGB'][2].toString()
+                context.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+                context.fillRect(0, 0, 50, 50);
+    }
+        });
     });
 {% endblock %}
