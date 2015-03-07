@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>Adriel</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "base.html" %}
+{% block head %}
+        <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet" type="text/css" media="all">
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" media="all">
+        <link href="{{ url_for('static', filename='css/bootstrap-theme.css') }}" rel="stylesheet" type="text/css" media="all">
+        <link href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}" rel="stylesheet" type="text/css" media="all">
+        <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+{% endblock %}
+{% block body %}
+    <p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
+<div class="wrapper" id="main_div">
+    <button class="btn btn-lg btn-default">Upload Flower</button>
+</div>
+{% endblock %}
