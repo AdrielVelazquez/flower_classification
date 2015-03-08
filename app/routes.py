@@ -39,9 +39,32 @@ def get_image():
     x = float(request.args.get("x"))
     y = float(request.args.get("y"))
     filename = request.args.get("filename").split("/")[-1]
+    process = request.args.get("process")
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-    print file_path
     im = Image.open(file_path)
     rgb_im = im.convert('RGB')
     r, g, b = rgb_im.getpixel((x, y))
+    flower_dictionary[filename]["{}_RGB".format(process)] = (r, g, b)
+    print flower_dictionary
     return jsonify({"RGB": (r, g, b)})
+
+
+@classification.route("/counter", methods=["GET"])
+def save_count():
+    filename = request.args.get("filename").split("/")[-1]
+    count = int(request.args.get("count"))
+    flower_dictionary[filename]["count"] = count
+    print flower_dictionary
+    return jsonify({"RGB": 0})
+
+@classification.route("/picker", methods=["GET"])
+def second_image():
+    filename = request.args.get("filename")
+    process = request.args.get("process")
+    return render_template("index.html", process=process, file_path=filename)
+
+@classification.route("/count", methods=["GET"])
+def petal_count():
+    filename = request.args.get("filename")
+    process = request.args.get("process")
+    return render_template("index.html", process=process, file_path=filename)

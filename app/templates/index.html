@@ -32,8 +32,24 @@
   {% elif process == "primary" %}
       <p>Primary Petal Color</p>
       <canvas id="chosen_color" width="200" height="60"></canvas>
-      <img src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" id="flower" style="width:304px;height:228px">
-      <button class="btn btn-sm btn-primary">Next</button>
+      <img value="{{ process }}" src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" id="flower" style="width:304px;height:228px">
+      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.second_image', filename=file_path, process="secondary") }}">Next</a>
+  {% elif process == "secondary" %}
+      <p>Secondary Petal Color</p>
+      <canvas id="chosen_color" width="200" height="60"></canvas>
+      <img value="{{ process }}" src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" id="flower" style="width:304px;height:228px">
+      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.petal_count', filename=file_path, process="count") }}">Next</a>
+  {% elif process == "count" %}
+      <p>Petal Count</p>
+        <form>
+          <select class="btn btn-sm" id="selector">
+            {% for i in range(40) %}
+                <option value="{{ i }}" selected="selected">{{ i }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      <img value="{{ process }}" src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" style="width:304px;height:228px">
+      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.petal_count', filename=file_path, process="count") }}">Next</a>
   {% endif %}
 </div>
 {% endblock %}
@@ -42,6 +58,7 @@
     $( "#flower" ).click(function(e) {
         var offset = $(this).offset();
         var filename = $(this).attr("src");
+        var process = $(this).attr("value");
         var x = e.clientX - offset.left;
         var y = e.clientY - offset.top;
         $.ajax({
@@ -52,6 +69,7 @@
                     x: x,
                     y: y,
                     filename: filename,
+                    process: process,
                 }, success:function(data) {
                 var example = document.getElementById('chosen_color');
                 var context = example.getContext('2d');
@@ -60,6 +78,25 @@
                 var b = data['RGB'][2].toString()
                 context.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
                 context.fillRect(0, 0, 50, 50);
+    }
+        });
+    });
+
+    $("#selector").change(function() {
+        console.log("Adriel")
+        var process = $("img").attr("value");
+        var count = $( "#selector option:selected" ).text();;
+        var filename =  $("img").attr("src");
+        $.ajax({
+                url: "{{ url_for('classification.save_count') }}",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    filename: filename,
+                    process: process,
+                    count: count,
+                }, success:function(data) {
+
     }
         });
     });
