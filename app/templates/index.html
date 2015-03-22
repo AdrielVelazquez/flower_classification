@@ -49,7 +49,12 @@
           </select>
         </form>
       <img value="{{ process }}" src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" style="width:304px;height:228px">
-      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.petal_count', filename=file_path, process="count") }}">Next</a>
+      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.stem_color', filename=file_path, process="stem_color") }}">Next</a>
+  {% elif process == "stem_color" %}
+      <p>Stem Color</p>
+      <canvas id="chosen_color" width="200" height="60"></canvas>
+      <img value="{{ process }}" src="{{ url_for('static', filename='imgs/temp/' + file_path) }}" id="flower" style="width:304px;height:228px">
+      <a id="next" class="btn btn-sm btn-primary" href="{{ url_for('classification.main_application', filename=file_path, process="submit") }}">Submit</a>
   {% endif %}
 </div>
 {% endblock %}
@@ -83,7 +88,6 @@
     });
 
     $("#selector").change(function() {
-        console.log("Adriel")
         var process = $("img").attr("value");
         var count = $( "#selector option:selected" ).text();;
         var filename =  $("img").attr("src");
