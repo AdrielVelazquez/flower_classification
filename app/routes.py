@@ -5,6 +5,9 @@ import csv
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
+from skimage import io, color
+from colormath.color_objects import LabColor, sRGBColor, XYZColor, HSLColor
+from colormath.color_conversions import convert_color
 
 UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/static/imgs/temp"
 CSV_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/static/csv/master.csv"
@@ -48,9 +51,16 @@ def get_image():
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     im = Image.open(file_path)
     rgb_im = im.convert('RGB')
+
     r, g, b = rgb_im.getpixel((x, y))
+    rgb = sRGBColor(r, g, b)
+    lab = convert_color(rgb, LabColor, target_illuminant='d50')
+    xyz = convert_color(rgb, XYZColor, target_illuminant='d50')
+    hsi = convert_color(rgb, HSLColor)
     flower_dictionary[filename]["{}_RGB".format(process)] = (r, g, b)
-    print flower_dictionary
+    flower_dictionary[filename]["{}_LAB".format(process)] = (lab.lab_l, lab.lab_a, lab.lab_b)
+    flower_dictionary[filename]["{}_XYZ".format(process)] = (xyz.xyz_x, xyz.xyz_y, xyz.xyz_z)
+    flower_dictionary[filename]["{}_HSI".format(process)] = (hsi.hsl_h, hsi.hsl_s, hsi.hsl_l)
     return jsonify({"RGB": (r, g, b)})
 
 
@@ -84,7 +94,10 @@ def submit():
     filename = request.args.get("filename").split("/")[-1]
     flower_dict = flower_dictionary[filename]
     line = [filename]
-    keys = ['count','stem_color_RGB','primary_RGB','secondary_RGB']
+    keys = ['count', 'stem_color_RGB', 'primary_RGB', 'secondary_RGB',
+            'stem_color_XYZ', 'primary_XYZ', 'secondary_XYZ',
+            'stem_color_LAB', 'primary_LAB', 'secondary_LAB',
+            'stem_color_HSI', 'primary_HSI', 'secondary_HSI']
     line.extend([flower_dict.get(key) for key in keys])
     writer = csv.writer(open(CSV_FOLDER, 'a'))
     writer.writerow(line)
