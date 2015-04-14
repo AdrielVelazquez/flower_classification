@@ -1,11 +1,14 @@
 import os
 from collections import defaultdict
 import csv
+from ast import literal_eval
 
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
+import numpy
 from PIL import Image
 from skimage import io, color
+from sklearn.neighbors import NearestNeighbors
 from colormath.color_objects import LabColor, sRGBColor, XYZColor, HSLColor
 from colormath.color_conversions import convert_color
 
@@ -94,6 +97,34 @@ def submit():
     filename = request.args.get("filename").split("/")[-1]
     flower_dict = flower_dictionary[filename]
     line = [filename]
+    nparry = []
+    with open(CSV_FOLDER) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            temp = []
+            count = float(row['count'])
+            stem = literal_eval(row['stem_color_LAB'])
+            primary = literal_eval(row['primary_LAB'])
+            secondary = literal_eval(row['secondary_LAB'])
+            temp.append(count)
+            temp.extend(stem)
+            temp.extend(primary)
+            temp.extend(secondary)
+            nparry.append(temp)
+
+    uploaded_point = []
+    count = int(flower_dict.get('count'))
+    stem = flower_dict.get('stem_color_LAB')
+    primary = flower_dict.get('primary_LAB')
+    secondary = flower_dict.get('secondary_LAB')
+    uploaded_point.append(count)
+    uploaded_point.extend(stem)
+    uploaded_point.extend(primary)
+    uploaded_point.extend(secondary)
+
+    np_arary = numpy.array(nparry)
+    nbrs = NearestNeighbors(uploaded_point, n_neighbors=4, algorithm='auto').fit(np_arary)
+    distances, indices = nbrs.kneighbors(np_arary)
     keys = ['count', 'stem_color_RGB', 'primary_RGB', 'secondary_RGB',
             'stem_color_XYZ', 'primary_XYZ', 'secondary_XYZ',
             'stem_color_LAB', 'primary_LAB', 'secondary_LAB',
