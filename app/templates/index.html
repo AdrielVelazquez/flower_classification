@@ -15,6 +15,13 @@
   {% if process == "upload" %}
       <div class="panel panel-default">
         <div class="panel-heading"><strong>Upload Files</strong></div>
+          {% if distances %}
+            <div><strong>Previous Upload kNN</strong></div>
+            <p>Distances</p>
+            <p>{{distances}}</p>
+            <p>Indices</p>
+            <p>{{indices}}</p>
+          {% endif %}
         <div class="panel-body">
 
           <!-- Standar Form -->

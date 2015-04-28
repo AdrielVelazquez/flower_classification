@@ -31,7 +31,8 @@ def default():
 def main_application():
     process = request.args.get("process")
     if process == "submit":
-        submit()
+        distances, indices = submit()
+        return render_template("index.html", process="upload", distances=", ".join(map(str, distances)), indices=", ".join(map(str, indices)))
     if request.method == "POST":
         file = request.files['file']
         if file:
@@ -42,7 +43,7 @@ def main_application():
             img.thumbnail(image_size, Image.ANTIALIAS)
             img.save(file_path)
             return render_template("index.html", process="primary", file_path=filename)
-    return render_template("index.html", process="upload")
+    return render_template("index.html", process="upload", distances=None, indices=None)
 
 
 @classification.route("/get_coordinates_color", methods=["GET"])
@@ -121,10 +122,10 @@ def submit():
     uploaded_point.extend(stem)
     uploaded_point.extend(primary)
     uploaded_point.extend(secondary)
-
-    np_arary = numpy.array(nparry)
-    nbrs = NearestNeighbors(uploaded_point, n_neighbors=4, algorithm='auto').fit(np_arary)
-    distances, indices = nbrs.kneighbors(np_arary)
+    np_array = numpy.array(nparry)
+    nneighbors = 3 if len(np_array) >= 3 else len(np_array)
+    nbrs = NearestNeighbors().fit(np_array)
+    distances, indices = nbrs.kneighbors(uploaded_point, nneighbors, True)
     keys = ['count', 'stem_color_RGB', 'primary_RGB', 'secondary_RGB',
             'stem_color_XYZ', 'primary_XYZ', 'secondary_XYZ',
             'stem_color_LAB', 'primary_LAB', 'secondary_LAB',
@@ -132,3 +133,5 @@ def submit():
     line.extend([flower_dict.get(key) for key in keys])
     writer = csv.writer(open(CSV_FOLDER, 'a'))
     writer.writerow(line)
+
+    return distances, indices
